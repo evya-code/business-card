@@ -358,8 +358,8 @@
 <div class="footer">זהבית אהרון · KW בת-ים · 050-542-1034</div>
 
 <script>
-// הכנס כאן את ה-URL אחרי שפורסת את ה-Apps Script
-const SCRIPT_URL = 'PASTE_SCRIPT_URL_HERE';
+const SUPABASE_URL = 'https://qcsseuzpltcspwoovozx.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjc3NldXpwbHRjc3B3b292b3p4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3Njg4NzcsImV4cCI6MjA5MjM0NDg3N30.xEUKcNvrRFcgly70F7Lp_OeOla_0G4PLPC2vonpSke8';
 const LEADS_KEY = 'zahavit_leads_v1';
 let imgEls = [];
 let lightboxIdx = 0;
@@ -436,15 +436,17 @@ function submitLead(e) {
     localStorage.setItem(LEADS_KEY, JSON.stringify(leads));
   } catch(ex) {}
 
-  // שלח לענן אם URL מוגדר
-  if (SCRIPT_URL && SCRIPT_URL !== 'PASTE_SCRIPT_URL_HERE') {
-    fetch(SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(lead)
-    }).catch(() => {});
-  }
+  // שלח ל-Supabase
+  fetch(SUPABASE_URL + '/rest/v1/leads', {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=minimal'
+    },
+    body: JSON.stringify(lead)
+  }).catch(() => {});
 
   btn.textContent = 'נשלח! נחזור אליך בקרוב ✓';
   btn.style.background = '#22c55e';
