@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>פורטל לידים — אביתר דוידי</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #1a1a2e;
+    --border: rgba(255,255,255,0.07);
+    --border-accent: rgba(99,102,241,0.25);
+    --accent: #6366f1;
+    --accent-soft: #818cf8;
+    --accent-glow: rgba(99,102,241,0.15);
+    --text: #e2e8f0;
+    --text-muted: #94a3b8;
+    --text-dim: #475569;
+    --green: #22c55e;
+    --green-glow: rgba(34,197,94,0.15);
+    --orange: #f97316;
+    --orange-glow: rgba(249,115,22,0.15);
+    --yellow: #eab308;
+    --yellow-glow: rgba(234,179,8,0.15);
+    --gray: #64748b;
+    --gray-glow: rgba(100,116,139,0.15);
+    --red: #ef4444;
+    --red-glow: rgba(239,68,68,0.12);
+  }
+
+  body {
+    background: var(--bg);
+    min-height: 100vh;
+    font-family: 'Heebo', sans-serif;
+    color: var(--text);
+    padding: 20px 16px 60px;
+  }
+
+  /* ─── HEADER ─── */
+  .header {
+    max-width: 900px;
+    margin: 0 auto 28px;
+    position: relative;
+  }
+
+  .header-inner {
+    background: linear-gradient(145deg, var(--surface), var(--surface2));
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    box-shadow:
+      0 20px 60px rgba(0,0,0,0.5),
+      0 0 0 1px var(--border-accent),
+      inset 0 1px 0 rgba(255,255,255,0.05);
+    padding: 28px 32px 24px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .header-inner::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6, #06b6d4);
+  }
+
+  .header-glow {
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 220px; height: 220px;
+    background: radial-gradient(circle, rgba(99,102,241,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .header-tag {
+    display: inline-block;
+    background: var(--accent-glow);
+    border: 1px solid var(--border-accent);
+    color: var(--accent-soft);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+  }
+
+  .header-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+
+  .header-title span { color: var(--accent-soft); }
+
+  .header-sub {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 300;
+  }
+
+  .header-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+  }
+
+  .stat-pill {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 30px;
+    padding: 5px 14px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .stat-pill b { color: var(--text); font-weight: 600; }
+
+  /* ─── PANEL WRAPPER ─── */
+  .panel {
+    max-width: 900px;
+    margin: 0 auto 20px;
+    background: linear-gradient(145deg, var(--surface), #13131f);
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.4), 0 0 0 1px var(--border-accent);
+    overflow: hidden;
+  }
+
+  .panel-header {
+    padding: 18px 24px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .panel-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent-soft);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .panel-title-icon {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    background: var(--accent-glow);
+    border: 1px solid var(--border-accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+
+  /* ─── FORM ─── */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 20px 24px;
+  }
+
+  @media (max-width: 600px) {
+    .form-grid { grid-template-columns: 1fr; }
+  }
+
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .form-field.full { grid-column: 1 / -1; }
+
+  label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-dim);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  input, select, textarea {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-family: 'Heebo', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    direction: rtl;
+    width: 100%;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+  }
+
+  input::placeholder { color: var(--text-dim); }
+
+  select option {
+    background: #1a1a2e;
+    color: var(--text);
+  }
+
+  .form-actions {
+    padding: 0 24px 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: none;
+    font-family: 'Heebo', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #6366f1, #818cf8);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(99,102,241,0.35);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(99,102,241,0.5);
+  }
+
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-ghost {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+
+  .btn-ghost:hover {
+    background: rgba(255,255,255,0.08);
+    color: var(--text);
+  }
+
+  .btn-export {
+    background: rgba(34,197,94,0.1);
+    border: 1px solid rgba(34,197,94,0.25);
+    color: #4ade80;
+  }
+
+  .btn-export:hover {
+    background: rgba(34,197,94,0.18);
+    box-shadow: 0 0 14px rgba(34,197,94,0.15);
+  }
+
+  .btn-sm {
+    padding: 5px 12px;
+    font-size: 12px;
+    border-radius: 7px;
+  }
+
+  .btn-danger {
+    background: var(--red-glow);
+    border: 1px solid rgba(239,68,68,0.25);
+    color: #f87171;
+  }
+
+  .btn-danger:hover { background: rgba(239,68,68,0.2); }
+
+  .btn-save {
+    background: var(--accent-glow);
+    border: 1px solid var(--border-accent);
+    color: var(--accent-soft);
+  }
+
+  .btn-save:hover { background: rgba(99,102,241,0.2); }
+
+  /* ─── FILTER BAR ─── */
+  .filter-bar {
+    padding: 14px 24px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    background: rgba(0,0,0,0.1);
+  }
+
+  .filter-chip {
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    font-family: 'Heebo', sans-serif;
+    font-size: 12px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .filter-chip:hover { border-color: var(--accent); color: var(--accent-soft); }
+  .filter-chip.active {
+    background: var(--accent-glow);
+    border-color: var(--accent);
+    color: var(--accent-soft);
+    font-weight: 600;
+  }
+
+  .filter-search {
+    flex: 1;
+    min-width: 140px;
+    max-width: 240px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.03);
+    font-family: 'Heebo', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+    margin-right: auto;
+  }
+
+  .filter-search:focus { border-color: var(--accent); }
+  .filter-search::placeholder { color: var(--text-dim); }
+
+  /* ─── TABLE (desktop) ─── */
+  .table-wrap {
+    overflow-x: auto;
+    padding: 0;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead th {
+    padding: 12px 18px;
+    text-align: right;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-dim);
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    background: rgba(0,0,0,0.15);
+  }
+
+  tbody tr {
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.15s;
+  }
+
+  tbody tr:hover { background: rgba(99,102,241,0.04); }
+  tbody tr:last-child { border-bottom: none; }
+
+  tbody td {
+    padding: 13px 18px;
+    font-size: 14px;
+    color: var(--text);
+    vertical-align: middle;
+  }
+
+  .td-phone {
+    direction: ltr;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+
+  .td-date {
+    font-size: 12px;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+
+  .td-actions {
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  /* ─── MOBILE CARDS ─── */
+  .card-list { display: none; }
+
+  @media (max-width: 700px) {
+    .table-wrap { display: none; }
+    .card-list { display: flex; flex-direction: column; gap: 0; }
+
+    .lead-card {
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      transition: background 0.15s;
+    }
+
+    .lead-card:last-child { border-bottom: none; }
+    .lead-card:hover { background: rgba(99,102,241,0.04); }
+
+    .lead-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .lead-card-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .lead-card-phone {
+      font-size: 13px;
+      color: var(--text-muted);
+      direction: ltr;
+      text-align: right;
+      margin-top: 2px;
+    }
+
+    .lead-card-bottom {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .lead-card-date {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-right: auto;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    select.inline-select {
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+  }
+
+  /* ─── BADGES ─── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.8;
+  }
+
+  .badge-hot {
+    background: var(--green-glow);
+    border: 1px solid rgba(34,197,94,0.3);
+    color: #4ade80;
+    box-shadow: 0 0 10px rgba(34,197,94,0.1);
+  }
+
+  .badge-warm {
+    background: var(--orange-glow);
+    border: 1px solid rgba(249,115,22,0.3);
+    color: #fb923c;
+  }
+
+  .badge-lukewarm {
+    background: var(--yellow-glow);
+    border: 1px solid rgba(234,179,8,0.3);
+    color: #fbbf24;
+  }
+
+  .badge-cold {
+    background: var(--gray-glow);
+    border: 1px solid rgba(100,116,139,0.3);
+    color: #94a3b8;
+  }
+
+  .badge-new {
+    background: rgba(99,102,241,0.12);
+    border: 1px solid rgba(99,102,241,0.3);
+    color: var(--accent-soft);
+  }
+
+  .badge-inprog {
+    background: rgba(234,179,8,0.1);
+    border: 1px solid rgba(234,179,8,0.25);
+    color: #fbbf24;
+  }
+
+  .badge-closed {
+    background: rgba(34,197,94,0.1);
+    border: 1px solid rgba(34,197,94,0.25);
+    color: #4ade80;
+  }
+
+  .badge-irrelevant {
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.2);
+    color: #f87171;
+  }
+
+  /* ─── INLINE EDIT ─── */
+  select.inline-select {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-family: 'Heebo', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    cursor: pointer;
+    width: auto;
+  }
+
+  select.inline-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(99,102,241,0.12);
+  }
+
+  /* ─── EMPTY STATE ─── */
+  .empty-state {
+    padding: 60px 24px;
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 15px;
+  }
+
+  .empty-icon {
+    font-size: 40px;
+    margin-bottom: 14px;
+    opacity: 0.5;
+  }
+
+  /* ─── TOAST ─── */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #1e1e2e;
+    border: 1px solid var(--border-accent);
+    border-radius: 12px;
+    padding: 12px 22px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+    opacity: 0;
+    z-index: 1000;
+    white-space: nowrap;
+  }
+
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+
+  /* ─── MODAL ─── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 500;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .modal {
+    background: linear-gradient(145deg, #111118, #1a1a2e);
+    border: 1px solid var(--border-accent);
+    border-radius: 18px;
+    padding: 28px 28px 22px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+    transform: scale(0.95);
+    transition: transform 0.2s;
+    position: relative;
+  }
+
+  .modal-overlay.open .modal { transform: scale(1); }
+
+  .modal-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  @media (max-width: 440px) {
+    .modal-grid { grid-template-columns: 1fr; }
+  }
+
+  .modal-field { display: flex; flex-direction: column; gap: 6px; }
+  .modal-field.full { grid-column: 1 / -1; }
+
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+  .modal-close {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    background: rgba(255,255,255,0.06);
+    border: none;
+    border-radius: 8px;
+    width: 30px; height: 30px;
+    color: var(--text-muted);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+
+  .modal-close:hover { background: rgba(255,255,255,0.12); }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.3); border-radius: 3px; }
+
+  /* ─── MISC ─── */
+  .divider-line {
+    height: 1px;
+    background: linear-gradient(90deg, rgba(99,102,241,0.3), transparent);
+    margin: 0;
+  }
+
+  .toggle-btn {
+    background: none;
+    border: none;
+    color: var(--accent-soft);
+    font-family: 'Heebo', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+    transition: color 0.2s;
+  }
+
+  .toggle-btn:hover { color: #fff; }
+
+  .toggle-icon { transition: transform 0.2s; }
+  .toggle-icon.open { transform: rotate(180deg); }
+
+  .form-section {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.35s ease;
+  }
+
+  .form-section.open { max-height: 600px; }
+
+  /* ─── NOTES FIELD ─── */
+  textarea {
+    resize: vertical;
+    min-height: 70px;
+  }
+
+  .notes-cell {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+    color: var(--text-dim);
+    cursor: default;
+  }
+
+  .notes-cell:hover { color: var(--text-muted); }
+
+  /* ─── ROW HIGHLIGHT NEW ─── */
+  tr.row-new td:first-child {
+    border-right: 3px solid var(--accent);
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     HEADER
+═══════════════════════════════════════════ -->
+<div class="header">
+  <div class="header-inner">
+    <div class="header-glow"></div>
+    <div class="header-tag">שיווק נדל"ן · לידים</div>
+    <div class="header-title">פורטל לידים — <span>אביתר דוידי</span></div>
+    <div class="header-sub">לידים שאספתי עבורך ✨</div>
+    <div class="header-meta">
+      <div class="stat-pill">סה"כ: <b id="stat-total">0</b></div>
+      <div class="stat-pill">חמים: <b id="stat-hot">0</b></div>
+      <div class="stat-pill">בתהליך: <b id="stat-inprog">0</b></div>
+      <div class="stat-pill">סגורים: <b id="stat-closed">0</b></div>
+      <button class="btn btn-export btn-sm" onclick="exportCSV()" style="margin-right: auto;">
+        📥 ייצא CSV
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     ADD LEAD PANEL
+═══════════════════════════════════════════ -->
+<div class="panel">
+  <div class="panel-header">
+    <div class="panel-title">
+      <div class="panel-title-icon">➕</div>
+      הוסף ליד חדש
+    </div>
+    <button class="toggle-btn" id="toggle-form-btn" onclick="toggleForm()">
+      הוסף ליד חדש +
+      <span class="toggle-icon" id="toggle-icon">▼</span>
+    </button>
+  </div>
+
+  <div class="form-section" id="form-section">
+    <form id="lead-form" onsubmit="addLead(event)">
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="f-name">שם מלא</label>
+          <input type="text" id="f-name" placeholder="ישראל ישראלי" required>
+        </div>
+        <div class="form-field">
+          <label for="f-phone">טלפון</label>
+          <input type="tel" id="f-phone" placeholder="050-0000000" required>
+        </div>
+        <div class="form-field">
+          <label for="f-interest">רמת עניין</label>
+          <select id="f-interest" required>
+            <option value="" disabled selected>בחר/י...</option>
+            <option value="חם">🟢 חם</option>
+            <option value="חמים">🟠 חמים</option>
+            <option value="פושר">🟡 פושר</option>
+            <option value="קר">⚪ קר</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="f-status">סטטוס</label>
+          <select id="f-status" required>
+            <option value="" disabled selected>בחר/י...</option>
+            <option value="חדש">✨ חדש</option>
+            <option value="בתהליך">🔄 בתהליך</option>
+            <option value="סגור">✅ סגור</option>
+            <option value="לא רלוונטי">❌ לא רלוונטי</option>
+          </select>
+        </div>
+        <div class="form-field full">
+          <label for="f-notes">הערות (אופציונלי)</label>
+          <textarea id="f-notes" placeholder="מחפש 4 חדרים בבת ים, תקציב 2M..."></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">הוסף ליד ✓</button>
+        <button type="button" class="btn btn-ghost" onclick="resetForm()">נקה</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     LEADS TABLE
+═══════════════════════════════════════════ -->
+<div class="panel">
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <input class="filter-search" type="text" id="search-input" placeholder="חיפוש שם / טלפון..." oninput="renderLeads()">
+    <button class="filter-chip active" data-filter="all" onclick="setFilter('all', this)">הכל</button>
+    <button class="filter-chip" data-filter="חדש" onclick="setFilter('חדש', this)">חדש</button>
+    <button class="filter-chip" data-filter="בתהליך" onclick="setFilter('בתהליך', this)">בתהליך</button>
+    <button class="filter-chip" data-filter="סגור" onclick="setFilter('סגור', this)">סגור</button>
+    <button class="filter-chip" data-filter="לא רלוונטי" onclick="setFilter('לא רלוונטי', this)">לא רלוונטי</button>
+  </div>
+
+  <!-- Desktop Table -->
+  <div class="table-wrap">
+    <table id="leads-table">
+      <thead>
+        <tr>
+          <th>שם</th>
+          <th>טלפון</th>
+          <th>רמת עניין</th>
+          <th>סטטוס</th>
+          <th>הערות</th>
+          <th>תאריך</th>
+          <th>פעולות</th>
+        </tr>
+      </thead>
+      <tbody id="leads-tbody">
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Mobile Card List -->
+  <div class="card-list" id="leads-cardlist"></div>
+
+  <!-- Empty state -->
+  <div class="empty-state" id="empty-state" style="display:none;">
+    <div class="empty-icon">📋</div>
+    עדיין אין לידים — נתחיל לעבוד! 💪
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     EDIT MODAL
+═══════════════════════════════════════════ -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">✏️ עריכת ליד</div>
+    <div class="modal-grid">
+      <div class="modal-field">
+        <label for="e-name">שם מלא</label>
+        <input type="text" id="e-name" required>
+      </div>
+      <div class="modal-field">
+        <label for="e-phone">טלפון</label>
+        <input type="tel" id="e-phone" required>
+      </div>
+      <div class="modal-field">
+        <label for="e-interest">רמת עניין</label>
+        <select id="e-interest">
+          <option value="חם">🟢 חם</option>
+          <option value="חמים">🟠 חמים</option>
+          <option value="פושר">🟡 פושר</option>
+          <option value="קר">⚪ קר</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label for="e-status">סטטוס</label>
+        <select id="e-status">
+          <option value="חדש">✨ חדש</option>
+          <option value="בתהליך">🔄 בתהליך</option>
+          <option value="סגור">✅ סגור</option>
+          <option value="לא רלוונטי">❌ לא רלוונטי</option>
+        </select>
+      </div>
+      <div class="modal-field full">
+        <label for="e-notes">הערות</label>
+        <textarea id="e-notes"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">ביטול</button>
+      <button class="btn btn-primary" onclick="saveEdit()">שמור שינויים ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+// DATA LAYER
+// ═══════════════════════════════════════════
+const STORAGE_KEY = 'zahavit_leads_v1';
+let leads = [];
+let currentFilter = 'all';
+let editingId = null;
+
+function loadLeads() {
+  try {
+    leads = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  } catch {
+    leads = [];
+  }
+}
+
+function saveLeads() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(leads));
+}
+
+function generateId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+function todayStr() {
+  const d = new Date();
+  return d.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+// ═══════════════════════════════════════════
+// FORM & ADD
+// ═══════════════════════════════════════════
+let formOpen = false;
+
+function toggleForm() {
+  formOpen = !formOpen;
+  document.getElementById('form-section').classList.toggle('open', formOpen);
+  document.getElementById('toggle-icon').classList.toggle('open', formOpen);
+  if (formOpen) {
+    setTimeout(() => document.getElementById('f-name').focus(), 100);
+  }
+}
+
+function resetForm() {
+  document.getElementById('lead-form').reset();
+}
+
+function addLead(e) {
+  e.preventDefault();
+  const lead = {
+    id: generateId(),
+    name: document.getElementById('f-name').value.trim(),
+    phone: document.getElementById('f-phone').value.trim(),
+    interest: document.getElementById('f-interest').value,
+    status: document.getElementById('f-status').value,
+    notes: document.getElementById('f-notes').value.trim(),
+    date: todayStr(),
+    isNew: true,
+  };
+  leads.unshift(lead);
+  saveLeads();
+  resetForm();
+  renderLeads();
+  updateStats();
+  showToast('✅ הליד נוסף בהצלחה!');
+
+  // Remove "new" highlight after 3s
+  setTimeout(() => {
+    const l = leads.find(x => x.id === lead.id);
+    if (l) { l.isNew = false; saveLeads(); }
+  }, 3000);
+}
+
+// ═══════════════════════════════════════════
+// FILTER
+// ═══════════════════════════════════════════
+function setFilter(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  renderLeads();
+}
+
+function getFiltered() {
+  const q = (document.getElementById('search-input')?.value || '').trim().toLowerCase();
+  return leads.filter(l => {
+    const matchFilter = currentFilter === 'all' || l.status === currentFilter;
+    const matchSearch = !q ||
+      l.name.toLowerCase().includes(q) ||
+      l.phone.replace(/\D/g,'').includes(q.replace(/\D/g,''));
+    return matchFilter && matchSearch;
+  });
+}
+
+// ═══════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════
+function interestBadge(val) {
+  const map = {
+    'חם':     ['badge-hot',      '🟢 חם'],
+    'חמים':   ['badge-warm',     '🟠 חמים'],
+    'פושר':   ['badge-lukewarm', '🟡 פושר'],
+    'קר':     ['badge-cold',     '⚪ קר'],
+  };
+  const [cls, label] = map[val] || ['badge-cold', val];
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+
+function statusBadge(val) {
+  const map = {
+    'חדש':         ['badge-new',        '✨ חדש'],
+    'בתהליך':      ['badge-inprog',     '🔄 בתהליך'],
+    'סגור':        ['badge-closed',     '✅ סגור'],
+    'לא רלוונטי':  ['badge-irrelevant', '❌ לא רלוונטי'],
+  };
+  const [cls, label] = map[val] || ['badge-new', val];
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+
+function quickStatusSelect(lead) {
+  const opts = ['חדש','בתהליך','סגור','לא רלוונטי'];
+  const optHtml = opts.map(o =>
+    `<option value="${o}" ${o === lead.status ? 'selected' : ''}>${o}</option>`
+  ).join('');
+  return `<select class="inline-select" onchange="quickStatus('${lead.id}', this.value)">${optHtml}</select>`;
+}
+
+function renderLeads() {
+  const filtered = getFiltered();
+  const tbody = document.getElementById('leads-tbody');
+  const cardList = document.getElementById('leads-cardlist');
+  const empty = document.getElementById('empty-state');
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    cardList.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  // Desktop rows
+  tbody.innerHTML = filtered.map(l => `
+    <tr class="${l.isNew ? 'row-new' : ''}">
+      <td><b style="color:#fff">${escHtml(l.name)}</b></td>
+      <td class="td-phone"><a href="tel:${escHtml(l.phone)}" style="color:inherit;text-decoration:none;">${escHtml(l.phone)}</a></td>
+      <td>${interestBadge(l.interest)}</td>
+      <td>${quickStatusSelect(l)}</td>
+      <td><div class="notes-cell" title="${escHtml(l.notes || '')}">${escHtml(l.notes || '—')}</div></td>
+      <td class="td-date">${escHtml(l.date)}</td>
+      <td>
+        <div class="td-actions">
+          <button class="btn btn-save btn-sm" onclick="openEdit('${l.id}')">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteLead('${l.id}')">🗑️</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+
+  // Mobile cards
+  cardList.innerHTML = filtered.map(l => `
+    <div class="lead-card">
+      <div class="lead-card-top">
+        <div>
+          <div class="lead-card-name">${escHtml(l.name)}</div>
+          <div class="lead-card-phone">
+            <a href="tel:${escHtml(l.phone)}" style="color:inherit;text-decoration:none;">📞 ${escHtml(l.phone)}</a>
+          </div>
+        </div>
+        <div>${interestBadge(l.interest)}</div>
+      </div>
+      ${l.notes ? `<div style="font-size:12px;color:var(--text-dim);margin-bottom:6px;">${escHtml(l.notes)}</div>` : ''}
+      <div class="lead-card-bottom">
+        ${quickStatusSelect(l)}
+        <span class="lead-card-date">📅 ${escHtml(l.date)}</span>
+      </div>
+      <div class="card-actions">
+        <button class="btn btn-save btn-sm" onclick="openEdit('${l.id}')">✏️ עריכה</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteLead('${l.id}')">🗑️ מחק</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+// ═══════════════════════════════════════════
+// QUICK STATUS CHANGE
+// ═══════════════════════════════════════════
+function quickStatus(id, newStatus) {
+  const l = leads.find(x => x.id === id);
+  if (l) {
+    l.status = newStatus;
+    saveLeads();
+    updateStats();
+    renderLeads();
+    showToast('💾 סטטוס עודכן');
+  }
+}
+
+// ═══════════════════════════════════════════
+// DELETE
+// ═══════════════════════════════════════════
+function deleteLead(id) {
+  if (!confirm('למחוק את הליד?')) return;
+  leads = leads.filter(l => l.id !== id);
+  saveLeads();
+  renderLeads();
+  updateStats();
+  showToast('🗑️ הליד נמחק');
+}
+
+// ═══════════════════════════════════════════
+// EDIT MODAL
+// ═══════════════════════════════════════════
+function openEdit(id) {
+  editingId = id;
+  const l = leads.find(x => x.id === id);
+  if (!l) return;
+  document.getElementById('e-name').value = l.name;
+  document.getElementById('e-phone').value = l.phone;
+  document.getElementById('e-interest').value = l.interest;
+  document.getElementById('e-status').value = l.status;
+  document.getElementById('e-notes').value = l.notes || '';
+  document.getElementById('edit-modal').classList.add('open');
+  setTimeout(() => document.getElementById('e-name').focus(), 150);
+}
+
+function closeModal() {
+  document.getElementById('edit-modal').classList.remove('open');
+  editingId = null;
+}
+
+function saveEdit() {
+  if (!editingId) return;
+  const l = leads.find(x => x.id === editingId);
+  if (!l) return;
+  l.name     = document.getElementById('e-name').value.trim();
+  l.phone    = document.getElementById('e-phone').value.trim();
+  l.interest = document.getElementById('e-interest').value;
+  l.status   = document.getElementById('e-status').value;
+  l.notes    = document.getElementById('e-notes').value.trim();
+  saveLeads();
+  renderLeads();
+  updateStats();
+  closeModal();
+  showToast('✅ הליד עודכן');
+}
+
+// Close modal on overlay click
+document.getElementById('edit-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ═══════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════
+function updateStats() {
+  document.getElementById('stat-total').textContent = leads.length;
+  document.getElementById('stat-hot').textContent =
+    leads.filter(l => l.interest === 'חם' || l.interest === 'חמים').length;
+  document.getElementById('stat-inprog').textContent =
+    leads.filter(l => l.status === 'בתהליך').length;
+  document.getElementById('stat-closed').textContent =
+    leads.filter(l => l.status === 'סגור').length;
+}
+
+// ═══════════════════════════════════════════
+// EXPORT CSV
+// ═══════════════════════════════════════════
+function exportCSV() {
+  if (leads.length === 0) { showToast('אין לידים לייצוא'); return; }
+
+  const BOM = '\uFEFF';
+  const headers = ['שם','טלפון','רמת עניין','סטטוס','הערות','תאריך'];
+  const rows = leads.map(l =>
+    [l.name, l.phone, l.interest, l.status, l.notes || '', l.date]
+      .map(v => `"${String(v).replace(/"/g,'""')}"`)
+      .join(',')
+  );
+  const csv = BOM + [headers.join(','), ...rows].join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const today = new Date().toISOString().slice(0,10);
+  a.download = `לידים-זהבית-${today}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('📥 קובץ CSV הורד');
+}
+
+// ═══════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ═══════════════════════════════════════════
+// KEYBOARD
+// ═══════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+loadLeads();
+renderLeads();
+updateStats();
+
+// Open form on first visit if no leads
+if (leads.length === 0) toggleForm();
+</script>
+</body>
+</html>
