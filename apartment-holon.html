@@ -358,6 +358,8 @@
 <div class="footer">זהבית אהרון · KW בת-ים · 050-542-1034</div>
 
 <script>
+// הכנס כאן את ה-URL אחרי שפורסת את ה-Apps Script
+const SCRIPT_URL = 'PASTE_SCRIPT_URL_HERE';
 const LEADS_KEY = 'zahavit_leads_v1';
 let imgEls = [];
 let lightboxIdx = 0;
@@ -416,27 +418,35 @@ function submitLead(e) {
   e.preventDefault();
   const name  = document.getElementById('lead-name').value.trim();
   const phone = document.getElementById('lead-phone').value.trim();
+  const btn   = document.querySelector('.btn-submit');
 
+  const d = new Date();
+  const dateStr = d.toLocaleDateString('he-IL', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+  const lead = {
+    id: Date.now(), name, phone,
+    interest: 'דירה בחולון', status: 'פתוח',
+    notes: 'ליד מדף הנכס', source: 'דירה חולון',
+    date: dateStr, isNew: true
+  };
+
+  // שמור מקומית תמיד (fallback)
   try {
-    const d = new Date();
-    const dateStr = d.toLocaleDateString('he-IL', { day:'2-digit', month:'2-digit', year:'numeric' });
     const leads = JSON.parse(localStorage.getItem(LEADS_KEY) || '[]');
-    leads.unshift({
-      id: Date.now(),
-      name,
-      phone,
-      interest: 'דירה בחולון',
-      status: 'פתוח',
-      notes: 'ליד מדף הנכס',
-      source: 'דירה חולון',
-      date: dateStr,
-      isNew: true
-    });
+    leads.unshift(lead);
     localStorage.setItem(LEADS_KEY, JSON.stringify(leads));
   } catch(ex) {}
 
-  const btn = document.querySelector('.btn-submit');
-  btn.textContent = 'נשלח\! נחזור אליך בקרוב ✓';
+  // שלח לענן אם URL מוגדר
+  if (SCRIPT_URL && SCRIPT_URL !== 'PASTE_SCRIPT_URL_HERE') {
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(lead)
+    }).catch(() => {});
+  }
+
+  btn.textContent = 'נשלח! נחזור אליך בקרוב ✓';
   btn.style.background = '#22c55e';
   btn.disabled = true;
 
