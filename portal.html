@@ -821,8 +821,8 @@
           <label for="f-status">סטטוס</label>
           <select id="f-status" required>
             <option value="" disabled selected>בחר/י...</option>
-            <option value="חדש">חדש</option>
-            <option value="בתהליך">בתהליך</option>
+            <option value="פתוח">פתוח</option>
+            <option value="בטיפול">בטיפול</option>
             <option value="סגור">סגור</option>
             <option value="לא רלוונטי">לא רלוונטי</option>
           </select>
@@ -848,8 +848,8 @@
   <div class="filter-bar">
     <input class="filter-search" type="text" id="search-input" placeholder="חיפוש שם / טלפון..." oninput="renderLeads()">
     <button class="filter-chip active" data-filter="all" onclick="setFilter('all', this)">הכל</button>
-    <button class="filter-chip" data-filter="חדש" onclick="setFilter('חדש', this)">חדש</button>
-    <button class="filter-chip" data-filter="בתהליך" onclick="setFilter('בתהליך', this)">בתהליך</button>
+    <button class="filter-chip" data-filter="פתוח" onclick="setFilter('פתוח', this)">פתוח</button>
+    <button class="filter-chip" data-filter="בטיפול" onclick="setFilter('בטיפול', this)">בטיפול</button>
     <button class="filter-chip" data-filter="סגור" onclick="setFilter('סגור', this)">סגור</button>
     <button class="filter-chip" data-filter="לא רלוונטי" onclick="setFilter('לא רלוונטי', this)">לא רלוונטי</button>
   </div>
@@ -911,8 +911,8 @@
       <div class="modal-field">
         <label for="e-status">סטטוס</label>
         <select id="e-status">
-          <option value="חדש">חדש</option>
-          <option value="בתהליך">בתהליך</option>
+          <option value="פתוח">פתוח</option>
+          <option value="בטיפול">בטיפול</option>
           <option value="סגור">סגור</option>
           <option value="לא רלוונטי">לא רלוונטי</option>
         </select>
@@ -1076,8 +1076,8 @@ function interestBadge(val) {
 
 function statusBadge(val) {
   const map = {
-    'חדש':         ['badge-new',        'חדש'],
-    'בתהליך':      ['badge-inprog',     'בתהליך'],
+    'פתוח':        ['badge-new',        'פתוח'],
+    'בטיפול':      ['badge-inprog',     'בטיפול'],
     'סגור':        ['badge-closed',     'סגור'],
     'לא רלוונטי':  ['badge-irrelevant', 'לא רלוונטי'],
   };
