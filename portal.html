@@ -1110,7 +1110,7 @@ function renderLeads() {
   // Desktop rows
   tbody.innerHTML = filtered.map(l => `
     <tr class="${l.isNew ? 'row-new' : ''}">
-      <td><b style="color:#fff">${escHtml(l.name)}</b></td>
+      <td><b style="color:#fff">${escHtml(l.name)}</b>${l.source ? `<div style="font-size:10px;color:var(--text-dim);margin-top:2px;">📍 ${escHtml(l.source)}</div>` : ''}</td>
       <td class="td-phone"><a href="tel:${escHtml(l.phone)}" style="color:inherit;text-decoration:none;">${escHtml(l.phone)}</a></td>
       <td>${interestBadge(l.interest)}</td>
       <td>${quickStatusSelect(l)}</td>
@@ -1131,6 +1131,7 @@ function renderLeads() {
       <div class="lead-card-top">
         <div>
           <div class="lead-card-name">${escHtml(l.name)}</div>
+          ${l.source ? `<div style="font-size:10px;color:var(--text-dim);">📍 ${escHtml(l.source)}</div>` : ''}
           <div class="lead-card-phone">
             <a href="tel:${escHtml(l.phone)}" style="color:inherit;text-decoration:none;">📞 ${escHtml(l.phone)}</a>
           </div>
