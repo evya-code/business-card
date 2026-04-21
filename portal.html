@@ -738,6 +738,13 @@
   tr.row-new td:first-child {
     border-right: 3px solid var(--accent);
   }
+
+  #mode-btn { position:fixed; bottom:24px; left:24px; width:36px; height:36px; border-radius:10px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.2s; z-index:200; }
+  #mode-btn:hover { background:rgba(99,102,241,0.12); border-color:rgba(99,102,241,0.3); }
+  #mode-btn svg { width:15px; height:15px; stroke:#475569; transition:stroke 0.2s; }
+  #mode-btn:hover svg { stroke:#818cf8; }
+  body.edit-mode [contenteditable=true] { border-bottom:1px dashed rgba(99,102,241,0.4); cursor:text; outline:none; }
+  body.edit-mode [contenteditable=true]:focus { border-bottom-color:#6366f1; background:rgba(99,102,241,0.06); border-radius:3px; }
 </style>
 </head>
 <body>
@@ -748,16 +755,16 @@
 <div class="header">
   <div class="header-inner">
     <div class="header-glow"></div>
-    <div class="header-tag">שיווק נדל"ן · לידים</div>
-    <div class="header-title">פורטל לידים — <span>אביתר דוידי</span></div>
-    <div class="header-sub">לידים שאספתי עבורך ✨</div>
+    <div class="header-tag" contenteditable="false">שיווק נדל"ן · לידים</div>
+    <div class="header-title" contenteditable="false">פורטל לידים — <span>אביתר דוידי</span></div>
+    <div class="header-sub" contenteditable="false">לידים שאספתי עבורך</div>
     <div class="header-meta">
       <div class="stat-pill">סה"כ: <b id="stat-total">0</b></div>
       <div class="stat-pill">חמים: <b id="stat-hot">0</b></div>
       <div class="stat-pill">בתהליך: <b id="stat-inprog">0</b></div>
       <div class="stat-pill">סגורים: <b id="stat-closed">0</b></div>
       <button class="btn btn-export btn-sm" onclick="exportCSV()" style="margin-right: auto;">
-        📥 ייצא CSV
+        ייצא CSV
       </button>
     </div>
   </div>
@@ -769,7 +776,7 @@
 <div class="panel">
   <div class="panel-header">
     <div class="panel-title">
-      <div class="panel-title-icon">➕</div>
+      <div class="panel-title-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
       הוסף ליד חדש
     </div>
     <button class="toggle-btn" id="toggle-form-btn" onclick="toggleForm()">
@@ -793,20 +800,20 @@
           <label for="f-interest">רמת עניין</label>
           <select id="f-interest" required>
             <option value="" disabled selected>בחר/י...</option>
-            <option value="חם">🟢 חם</option>
-            <option value="חמים">🟠 חמים</option>
-            <option value="פושר">🟡 פושר</option>
-            <option value="קר">⚪ קר</option>
+            <option value="חם">חם</option>
+            <option value="חמים">חמים</option>
+            <option value="פושר">פושר</option>
+            <option value="קר">קר</option>
           </select>
         </div>
         <div class="form-field">
           <label for="f-status">סטטוס</label>
           <select id="f-status" required>
             <option value="" disabled selected>בחר/י...</option>
-            <option value="חדש">✨ חדש</option>
-            <option value="בתהליך">🔄 בתהליך</option>
-            <option value="סגור">✅ סגור</option>
-            <option value="לא רלוונטי">❌ לא רלוונטי</option>
+            <option value="חדש">חדש</option>
+            <option value="בתהליך">בתהליך</option>
+            <option value="סגור">סגור</option>
+            <option value="לא רלוונטי">לא רלוונטי</option>
           </select>
         </div>
         <div class="form-field full">
@@ -815,7 +822,7 @@
         </div>
       </div>
       <div class="form-actions">
-        <button type="submit" class="btn btn-primary">הוסף ליד ✓</button>
+        <button type="submit" class="btn btn-primary">הוסף ליד</button>
         <button type="button" class="btn btn-ghost" onclick="resetForm()">נקה</button>
       </div>
     </form>
@@ -860,8 +867,8 @@
 
   <!-- Empty state -->
   <div class="empty-state" id="empty-state" style="display:none;">
-    <div class="empty-icon">📋</div>
-    עדיין אין לידים — נתחיל לעבוד! 💪
+    
+    עדיין אין לידים — נתחיל לעבוד
   </div>
 </div>
 
@@ -870,8 +877,8 @@
 ═══════════════════════════════════════════ -->
 <div class="modal-overlay" id="edit-modal">
   <div class="modal">
-    <button class="modal-close" onclick="closeModal()">✕</button>
-    <div class="modal-title">✏️ עריכת ליד</div>
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div class="modal-title">עריכת ליד</div>
     <div class="modal-grid">
       <div class="modal-field">
         <label for="e-name">שם מלא</label>
@@ -884,19 +891,19 @@
       <div class="modal-field">
         <label for="e-interest">רמת עניין</label>
         <select id="e-interest">
-          <option value="חם">🟢 חם</option>
-          <option value="חמים">🟠 חמים</option>
-          <option value="פושר">🟡 פושר</option>
-          <option value="קר">⚪ קר</option>
+          <option value="חם">חם</option>
+          <option value="חמים">חמים</option>
+          <option value="פושר">פושר</option>
+          <option value="קר">קר</option>
         </select>
       </div>
       <div class="modal-field">
         <label for="e-status">סטטוס</label>
         <select id="e-status">
-          <option value="חדש">✨ חדש</option>
-          <option value="בתהליך">🔄 בתהליך</option>
-          <option value="סגור">✅ סגור</option>
-          <option value="לא רלוונטי">❌ לא רלוונטי</option>
+          <option value="חדש">חדש</option>
+          <option value="בתהליך">בתהליך</option>
+          <option value="סגור">סגור</option>
+          <option value="לא רלוונטי">לא רלוונטי</option>
         </select>
       </div>
       <div class="modal-field full">
@@ -906,7 +913,7 @@
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal()">ביטול</button>
-      <button class="btn btn-primary" onclick="saveEdit()">שמור שינויים ✓</button>
+      <button class="btn btn-primary" onclick="saveEdit()">שמור שינויים</button>
     </div>
   </div>
 </div>
@@ -914,6 +921,10 @@
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
+<button id="mode-btn" onclick="toggleMode()" title="החלף מצב">
+  <svg id="icon-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+  <svg id="icon-pen" style="display:none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+</button>
 <script>
 // ═══════════════════════════════════════════
 // DATA LAYER
@@ -979,7 +990,7 @@ function addLead(e) {
   resetForm();
   renderLeads();
   updateStats();
-  showToast('✅ הליד נוסף בהצלחה!');
+  showToast('הליד נוסף');
 
   // Remove "new" highlight after 3s
   setTimeout(() => {
@@ -1014,10 +1025,10 @@ function getFiltered() {
 // ═══════════════════════════════════════════
 function interestBadge(val) {
   const map = {
-    'חם':     ['badge-hot',      '🟢 חם'],
-    'חמים':   ['badge-warm',     '🟠 חמים'],
-    'פושר':   ['badge-lukewarm', '🟡 פושר'],
-    'קר':     ['badge-cold',     '⚪ קר'],
+    'חם':     ['badge-hot',      'חם'],
+    'חמים':   ['badge-warm',     'חמים'],
+    'פושר':   ['badge-lukewarm', 'פושר'],
+    'קר':     ['badge-cold',     'קר'],
   };
   const [cls, label] = map[val] || ['badge-cold', val];
   return `<span class="badge ${cls}">${label}</span>`;
@@ -1025,10 +1036,10 @@ function interestBadge(val) {
 
 function statusBadge(val) {
   const map = {
-    'חדש':         ['badge-new',        '✨ חדש'],
-    'בתהליך':      ['badge-inprog',     '🔄 בתהליך'],
-    'סגור':        ['badge-closed',     '✅ סגור'],
-    'לא רלוונטי':  ['badge-irrelevant', '❌ לא רלוונטי'],
+    'חדש':         ['badge-new',        'חדש'],
+    'בתהליך':      ['badge-inprog',     'בתהליך'],
+    'סגור':        ['badge-closed',     'סגור'],
+    'לא רלוונטי':  ['badge-irrelevant', 'לא רלוונטי'],
   };
   const [cls, label] = map[val] || ['badge-new', val];
   return `<span class="badge ${cls}">${label}</span>`;
@@ -1067,7 +1078,7 @@ function renderLeads() {
       <td class="td-date">${escHtml(l.date)}</td>
       <td>
         <div class="td-actions">
-          <button class="btn btn-save btn-sm" onclick="openEdit('${l.id}')">✏️</button>
+          <button class="btn btn-save btn-sm" onclick="openEdit('${l.id}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button>
           <button class="btn btn-danger btn-sm" onclick="deleteLead('${l.id}')">🗑️</button>
         </div>
       </td>
@@ -1092,7 +1103,7 @@ function renderLeads() {
         <span class="lead-card-date">📅 ${escHtml(l.date)}</span>
       </div>
       <div class="card-actions">
-        <button class="btn btn-save btn-sm" onclick="openEdit('${l.id}')">✏️ עריכה</button>
+        <button class="btn btn-save btn-sm" onclick="openEdit('${l.id}')">עריכה</button>
         <button class="btn btn-danger btn-sm" onclick="deleteLead('${l.id}')">🗑️ מחק</button>
       </div>
     </div>
@@ -1117,7 +1128,7 @@ function quickStatus(id, newStatus) {
     saveLeads();
     updateStats();
     renderLeads();
-    showToast('💾 סטטוס עודכן');
+    showToast('סטטוס עודכן');
   }
 }
 
@@ -1130,7 +1141,7 @@ function deleteLead(id) {
   saveLeads();
   renderLeads();
   updateStats();
-  showToast('🗑️ הליד נמחק');
+  showToast('הליד נמחק');
 }
 
 // ═══════════════════════════════════════════
@@ -1167,7 +1178,7 @@ function saveEdit() {
   renderLeads();
   updateStats();
   closeModal();
-  showToast('✅ הליד עודכן');
+  showToast('הליד עודכן');
 }
 
 // Close modal on overlay click
@@ -1210,7 +1221,7 @@ function exportCSV() {
   a.download = `לידים-זהבית-${today}.csv`;
   a.click();
   URL.revokeObjectURL(url);
-  showToast('📥 קובץ CSV הורד');
+  showToast('CSV הורד');
 }
 
 // ═══════════════════════════════════════════
@@ -1235,12 +1246,18 @@ document.addEventListener('keydown', e => {
 // ═══════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════
-loadLeads();
+load();
 renderLeads();
-updateStats();
 
-// Open form on first visit if no leads
-if (leads.length === 0) toggleForm();
+function toggleMode() {
+  const on = document.body.classList.toggle('edit-mode');
+  document.querySelectorAll('[contenteditable]').forEach(el => el.contentEditable = on ? 'true' : 'false');
+  document.getElementById('icon-book').style.display = on ? 'none' : '';
+  document.getElementById('icon-pen').style.display = on ? '' : 'none';
+  if (\!on) { const d={}; document.querySelectorAll('[contenteditable]').forEach((el,i)=>d['l'+i]=el.innerHTML); localStorage.setItem('portal_labels',JSON.stringify(d)); }
+}
+(function(){ try { const d=JSON.parse(localStorage.getItem('portal_labels')||'{}'); document.querySelectorAll('[contenteditable]').forEach((el,i)=>{if(d['l'+i])el.innerHTML=d['l'+i];}); } catch(e){} })();
+
 </script>
 </body>
 </html>
