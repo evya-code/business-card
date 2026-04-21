@@ -973,38 +973,68 @@
 // DATA LAYER
 // ═══════════════════════════════════════════
 const STORAGE_KEY = 'zahavit_leads_v1';
-// הכנס כאן את ה-URL אחרי שפורסת את Apps Script
-const SCRIPT_URL = 'PASTE_SCRIPT_URL_HERE';
+const SUPABASE_URL = 'https://qcsseuzpltcspwoovozx.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjc3NldXpwbHRjc3B3b292b3p4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3Njg4NzcsImV4cCI6MjA5MjM0NDg3N30.xEUKcNvrRFcgly70F7Lp_OeOla_0G4PLPC2vonpSke8';
+
+const SB_HEADERS = {
+  'apikey': SUPABASE_KEY,
+  'Authorization': 'Bearer ' + SUPABASE_KEY,
+  'Content-Type': 'application/json'
+};
+
 let leads = [];
 let currentFilter = 'all';
 let editingId = null;
 
 function loadLeads() {
-  try {
-    leads = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-  } catch {
-    leads = [];
-  }
+  try { leads = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+  catch { leads = []; }
 }
 
 function saveLeads() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(leads));
 }
 
+// ─── Supabase helpers ───────────────────────────────────
+function sbInsert(lead) {
+  return fetch(SUPABASE_URL + '/rest/v1/leads', {
+    method: 'POST',
+    headers: { ...SB_HEADERS, 'Prefer': 'return=minimal' },
+    body: JSON.stringify(lead)
+  });
+}
+
+function sbUpdate(id, fields) {
+  return fetch(SUPABASE_URL + '/rest/v1/leads?id=eq.' + id, {
+    method: 'PATCH',
+    headers: { ...SB_HEADERS, 'Prefer': 'return=minimal' },
+    body: JSON.stringify(fields)
+  });
+}
+
+function sbDelete(id) {
+  return fetch(SUPABASE_URL + '/rest/v1/leads?id=eq.' + id, {
+    method: 'DELETE',
+    headers: SB_HEADERS
+  });
+}
+
 function syncFromCloud() {
-  if (!SCRIPT_URL || SCRIPT_URL === 'PASTE_SCRIPT_URL_HERE') return;
   const btn = document.getElementById('sync-btn');
   if (btn) { btn.textContent = '↻ מסנכרן...'; btn.disabled = true; }
 
-  fetch(SCRIPT_URL)
+  fetch(SUPABASE_URL + '/rest/v1/leads?select=*&order=created_at.desc', {
+    headers: SB_HEADERS
+  })
     .then(r => r.json())
-    .then(data => {
-      if (!data.ok || !data.leads) return;
-      const localIds = new Set(leads.map(l => String(l.id)));
+    .then(rows => {
+      if (!Array.isArray(rows)) return;
+      const remoteMap = new Map(rows.map(r => [String(r.id), r]));
+      const localIds  = new Set(leads.map(l => String(l.id)));
       let added = 0;
-      data.leads.forEach(cl => {
-        if (!localIds.has(String(cl.id))) {
-          leads.unshift({ ...cl, isNew: true });
+      rows.forEach(r => {
+        if (!localIds.has(String(r.id))) {
+          leads.unshift({ ...r, isNew: true });
           added++;
         }
       });
@@ -1012,12 +1042,12 @@ function syncFromCloud() {
         saveLeads();
         renderLeads();
         updateStats();
-        showToast(`סונכרנו ${added} לידים חדשים מהענן`);
+        showToast(`${added} לידים חדשים מהענן`);
       } else {
-        showToast('מעודכן — אין לידים חדשים');
+        showToast('מעודכן ✓');
       }
     })
-    .catch(() => showToast('שגיאת סנכרון — בדוק URL'))
+    .catch(() => showToast('שגיאת סנכרון'))
     .finally(() => {
       if (btn) { btn.textContent = '↻ סנכרן'; btn.disabled = false; }
     });
@@ -1068,8 +1098,8 @@ function addLead(e) {
   renderLeads();
   updateStats();
   showToast('הליד נוסף');
+  sbInsert(lead).catch(() => {});
 
-  // Remove "new" highlight after 3s
   setTimeout(() => {
     const l = leads.find(x => x.id === lead.id);
     if (l) { l.isNew = false; saveLeads(); }
@@ -1207,6 +1237,7 @@ function quickStatus(id, newStatus) {
     updateStats();
     renderLeads();
     showToast('סטטוס עודכן');
+    sbUpdate(id, { status: newStatus }).catch(() => {});
   }
 }
 
@@ -1220,6 +1251,7 @@ function deleteLead(id) {
   renderLeads();
   updateStats();
   showToast('הליד נמחק');
+  sbDelete(id).catch(() => {});
 }
 
 // ═══════════════════════════════════════════
@@ -1256,6 +1288,7 @@ function saveEdit() {
   renderLeads();
   updateStats();
   closeModal();
+  sbUpdate(editingId, { name: l.name, phone: l.phone, interest: l.interest, status: l.status, notes: l.notes }).catch(() => {});
   showToast('הליד עודכן');
 }
 
