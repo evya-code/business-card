@@ -774,7 +774,10 @@
       <div class="stat-pill">חמים: <b id="stat-hot">0</b></div>
       <div class="stat-pill">בתהליך: <b id="stat-inprog">0</b></div>
       <div class="stat-pill">סגורים: <b id="stat-closed">0</b></div>
-      <button class="btn btn-export btn-sm" onclick="exportCSV()" style="margin-right: auto;">
+      <button id="sync-btn" class="btn btn-save btn-sm" onclick="syncFromCloud()" style="margin-right: auto;" title="משוך לידים חדשים מהאתר">
+        ↻ סנכרן
+      </button>
+      <button class="btn btn-export btn-sm" onclick="exportCSV()">
         ייצא CSV
       </button>
     </div>
@@ -970,6 +973,8 @@
 // DATA LAYER
 // ═══════════════════════════════════════════
 const STORAGE_KEY = 'zahavit_leads_v1';
+// הכנס כאן את ה-URL אחרי שפורסת את Apps Script
+const SCRIPT_URL = 'PASTE_SCRIPT_URL_HERE';
 let leads = [];
 let currentFilter = 'all';
 let editingId = null;
@@ -984,6 +989,38 @@ function loadLeads() {
 
 function saveLeads() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(leads));
+}
+
+function syncFromCloud() {
+  if (!SCRIPT_URL || SCRIPT_URL === 'PASTE_SCRIPT_URL_HERE') return;
+  const btn = document.getElementById('sync-btn');
+  if (btn) { btn.textContent = '↻ מסנכרן...'; btn.disabled = true; }
+
+  fetch(SCRIPT_URL)
+    .then(r => r.json())
+    .then(data => {
+      if (!data.ok || !data.leads) return;
+      const localIds = new Set(leads.map(l => String(l.id)));
+      let added = 0;
+      data.leads.forEach(cl => {
+        if (!localIds.has(String(cl.id))) {
+          leads.unshift({ ...cl, isNew: true });
+          added++;
+        }
+      });
+      if (added > 0) {
+        saveLeads();
+        renderLeads();
+        updateStats();
+        showToast(`סונכרנו ${added} לידים חדשים מהענן`);
+      } else {
+        showToast('מעודכן — אין לידים חדשים');
+      }
+    })
+    .catch(() => showToast('שגיאת סנכרון — בדוק URL'))
+    .finally(() => {
+      if (btn) { btn.textContent = '↻ סנכרן'; btn.disabled = false; }
+    });
 }
 
 function generateId() {
@@ -1287,8 +1324,11 @@ document.addEventListener('keydown', e => {
 // ═══════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════
-load();
+loadLeads();
 renderLeads();
+updateStats();
+// סנכרון אוטומטי בטעינה
+setTimeout(syncFromCloud, 800);
 
 // ── Label persistence ──
 (function(){ try { const d=JSON.parse(localStorage.getItem('portal_labels')||'{}'); document.querySelectorAll('[contenteditable]').forEach((el,i)=>{if(d['l'+i])el.innerHTML=d['l'+i];}); } catch(e){} })();
@@ -1375,7 +1415,7 @@ function adminExportJSON() {
 function adminClearAll() {
   if (!confirm('למחוק את כל הלידים לצמיתות?')) return;
   leads = [];
-  save();
+  saveLeads();
   renderLeads();
   closeAdmin();
   showToast('כל הלידים נמחקו');
