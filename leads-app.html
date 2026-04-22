@@ -1,0 +1,391 @@
+<\!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="לידים">
+<meta name="theme-color" content="#0d0d1a">
+<title>ניהול לידים</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; background: #0d0d1a; font-family: 'Segoe UI', -apple-system, sans-serif; }
+input, textarea, button { font-family: inherit; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useCallback } = React;
+
+const SB_URL = 'https://qcsseuzpltcspwoovozx.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjc3NldXpwbHRjc3B3b292b3p4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3Njg4NzcsImV4cCI6MjA5MjM0NDg3N30.xEUKcNvrRFcgly70F7Lp_OeOla_0G4PLPC2vonpSke8';
+const SB_H = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' };
+const LOCAL_KEY = 'leads_v3';
+
+async function sbUpsert(lead) {
+  if (\!navigator.onLine) return;
+  try {
+    await fetch(SB_URL + '/rest/v1/leads', {
+      method: 'POST',
+      headers: { ...SB_H, 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify({ ...lead, updated_at: new Date().toISOString() })
+    });
+  } catch(e) {}
+}
+
+async function sbDelete(id) {
+  if (\!navigator.onLine) return;
+  try { await fetch(SB_URL + '/rest/v1/leads?id=eq.' + id, { method: 'DELETE', headers: SB_H }); } catch(e) {}
+}
+
+async function sbFetch() {
+  try {
+    const r = await fetch(SB_URL + '/rest/v1/leads?select=*&order=created_at.desc', { headers: SB_H });
+    if (r.ok) return await r.json();
+  } catch(e) {}
+  return null;
+}
+
+function saveLocal(leads) {
+  try { localStorage.setItem(LOCAL_KEY, JSON.stringify(leads)); } catch(e) {}
+}
+
+function loadLocal() {
+  try { return JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]'); } catch(e) { return []; }
+}
+
+const STATUS = {
+  new:     { label: 'חדש',           color: '#60a5fa', bg: '#1e3a5f' },
+  waiting: { label: 'ממתין',          color: '#fbbf24', bg: '#3d2d0a' },
+  sent:    { label: 'נשלח לזהבית',   color: '#a78bfa', bg: '#2d1f4d' },
+  closed:  { label: 'סגור ✓',        color: '#4ade80', bg: '#0f2d1a' },
+  lost:    { label: 'נפל',            color: '#f87171', bg: '#2d0f0f' },
+};
+
+const TEMPLATES = [
+  { label: 'פתיחה — אין מספר עדיין', text: 'היי\! וואי שמח שפנית 😊\nתשאיר/י לי מספר טלפון ואחזור אלייך עם כל הפרטים ולתיאום צפייה 📲' },
+  { label: 'אחרי שנתנו מספר', text: 'מעולה\! נחזור אלייך בקרוב 🙏' },
+  { label: 'חג שמח + בקשת מספר', text: 'היי\! חג שמח גם לך 😊\nהדירה ממש שווה, בטוח/ה תאהב/י אותה\!\nתשאיר/י לי מספר טלפון ואחזור אלייך עם כל הפרטים ולתיאום צפייה 🙏' },
+  { label: 'העברה לזהבית', text: 'זהבית שלום, יש מתעניין בדירה בחולון — הנה המספר שלו:' },
+];
+
+function CopyButton({ text, small }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button onClick={() => { navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 1500); }}
+      style={{ background: copied ? '#22c55e' : '#3b3b5c', color: 'white', border: 'none', borderRadius: '6px',
+        padding: small ? '4px 10px' : '6px 14px', fontSize: small ? '11px' : '12px',
+        cursor: 'pointer', transition: 'all 0.2s', minWidth: small ? '56px' : '72px', fontWeight: '600' }}>
+      {copied ? '✓ הועתק' : 'העתק'}
+    </button>
+  );
+}
+
+function StatusBadge({ status, onClick }) {
+  const s = STATUS[status] || STATUS.new;
+  return (
+    <button onClick={onClick} style={{ background: s.bg, color: s.color, border: `1px solid ${s.color}40`,
+      borderRadius: '999px', padding: '3px 10px', fontSize: '10px', cursor: 'pointer',
+      fontWeight: '600', letterSpacing: '0.08em' }}>
+      {s.label}
+    </button>
+  );
+}
+
+function LeadCard({ lead, onUpdate, onDelete }) {
+  const [expanded, setExpanded] = useState(false);
+  const [editNote, setEditNote] = useState(false);
+  const [noteDraft, setNoteDraft] = useState(lead.note || '');
+
+  const cycleStatus = () => {
+    const keys = Object.keys(STATUS);
+    const next = keys[(keys.indexOf(lead.status) + 1) % keys.length];
+    onUpdate({ ...lead, status: next });
+  };
+
+  return (
+    <div style={{ background: '#1a1a2e', border: '1px solid #2d2d4a', borderRadius: '12px', padding: '14px 16px', marginBottom: '10px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px' }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
+            <span style={{ color: '#f1f5f9', fontSize: '15px', fontWeight: '600' }}>{lead.name || 'ללא שם'}</span>
+            <StatusBadge status={lead.status} onClick={cycleStatus} />
+          </div>
+          <div style={{ color: '#94a3b8', fontSize: '13px', fontFamily: 'monospace', direction: 'ltr', textAlign: 'right' }}>
+            {lead.phone || 'אין מספר'}
+          </div>
+          {lead.source && <div style={{ color: '#64748b', fontSize: '11px', marginTop: '2px' }}>📍 {lead.source}</div>}
+        </div>
+        <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+          {lead.phone && <CopyButton text={lead.phone} small />}
+          <button onClick={() => setExpanded(\!expanded)}
+            style={{ background: 'transparent', color: '#94a3b8', border: '1px solid #3b3b5c',
+              borderRadius: '6px', padding: '4px 10px', fontSize: '11px', cursor: 'pointer' }}>
+            {expanded ? '▲' : '▼'}
+          </button>
+        </div>
+      </div>
+
+      {expanded && (
+        <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #2d2d4a' }}>
+          <div style={{ marginBottom: '10px' }}>
+            <div style={{ color: '#a78bfa', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '6px' }}>הערות</div>
+            {editNote ? (
+              <div>
+                <textarea value={noteDraft} onChange={e => setNoteDraft(e.target.value)}
+                  style={{ width: '100%', background: '#0d0d1a', color: '#e2e8f0', border: '1px solid #3b3b5c',
+                    borderRadius: '6px', padding: '8px', fontSize: '13px', minHeight: '60px', resize: 'vertical' }} />
+                <div style={{ display: 'flex', gap: '6px', marginTop: '6px' }}>
+                  <button onClick={() => { onUpdate({ ...lead, note: noteDraft }); setEditNote(false); }}
+                    style={{ background: '#22c55e', color: 'white', border: 'none', borderRadius: '6px', padding: '5px 12px', fontSize: '11px', cursor: 'pointer' }}>שמור</button>
+                  <button onClick={() => { setNoteDraft(lead.note || ''); setEditNote(false); }}
+                    style={{ background: 'transparent', color: '#94a3b8', border: '1px solid #3b3b5c', borderRadius: '6px', padding: '5px 12px', fontSize: '11px', cursor: 'pointer' }}>ביטול</button>
+                </div>
+              </div>
+            ) : (
+              <div onClick={() => setEditNote(true)}
+                style={{ color: lead.note ? '#e2e8f0' : '#64748b', fontSize: '13px', cursor: 'pointer',
+                  fontStyle: lead.note ? 'normal' : 'italic', padding: '6px 8px', background: '#0d0d1a',
+                  borderRadius: '6px', minHeight: '20px', whiteSpace: 'pre-wrap' }}>
+                {lead.note || 'לחץ להוספת הערה...'}
+              </div>
+            )}
+          </div>
+          {lead.phone && (
+            <a href={`tel:${lead.phone}`}
+              style={{ display: 'inline-block', background: '#0f2d1a', color: '#4ade80', border: '1px solid #166534',
+                borderRadius: '6px', padding: '4px 12px', fontSize: '11px', textDecoration: 'none', marginBottom: '8px', marginLeft: '6px' }}>
+              📞 התקשר
+            </a>
+          )}
+          {lead.phone && (
+            <a href={`https://wa.me/972${lead.phone.replace(/^0/, '').replace(/[-\s]/g, '')}`} target="_blank"
+              style={{ display: 'inline-block', background: '#0f2d1a', color: '#4ade80', border: '1px solid #166534',
+                borderRadius: '6px', padding: '4px 12px', fontSize: '11px', textDecoration: 'none', marginBottom: '8px' }}>
+              💬 וואצאפ
+            </a>
+          )}
+          <br/>
+          <button onClick={() => { if (confirm('למחוק את ' + lead.name + '?')) onDelete(lead.id); }}
+            style={{ background: 'transparent', color: '#f87171', border: '1px solid #7f1d1d',
+              borderRadius: '6px', padding: '4px 12px', fontSize: '11px', cursor: 'pointer' }}>מחק</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AddLeadForm({ onAdd }) {
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+
+  const submit = () => {
+    if (\!name.trim() && \!phone.trim()) return;
+    onAdd({ id: Date.now().toString(), name: name.trim(), phone: phone.trim(),
+      status: phone.trim() ? 'waiting' : 'new', note: '', source: 'ידני',
+      created_at: new Date().toISOString() });
+    setName(''); setPhone(''); setOpen(false);
+  };
+
+  if (\!open) return (
+    <button onClick={() => setOpen(true)}
+      style={{ width: '100%', background: 'linear-gradient(135deg, #7c3aed, #4f46e5)', color: 'white',
+        border: 'none', borderRadius: '12px', padding: '12px', fontSize: '14px', fontWeight: '600',
+        cursor: 'pointer', marginBottom: '16px', boxShadow: '0 4px 12px rgba(124,58,237,0.3)' }}>
+      + ליד חדש
+    </button>
+  );
+
+  return (
+    <div style={{ background: '#1a1a2e', border: '1px solid #4f46e5', borderRadius: '12px', padding: '14px', marginBottom: '16px' }}>
+      <input type="text" placeholder="שם" value={name} onChange={e => setName(e.target.value)}
+        style={{ width: '100%', background: '#0d0d1a', color: '#e2e8f0', border: '1px solid #3b3b5c',
+          borderRadius: '6px', padding: '8px 10px', fontSize: '14px', marginBottom: '8px' }} />
+      <input type="tel" placeholder="מספר טלפון" value={phone} onChange={e => setPhone(e.target.value)}
+        style={{ width: '100%', background: '#0d0d1a', color: '#e2e8f0', border: '1px solid #3b3b5c',
+          borderRadius: '6px', padding: '8px 10px', fontSize: '14px', marginBottom: '10px',
+          fontFamily: 'monospace', direction: 'ltr', textAlign: 'right' }} />
+      <div style={{ display: 'flex', gap: '6px' }}>
+        <button onClick={submit} style={{ flex: 1, background: '#22c55e', color: 'white', border: 'none', borderRadius: '6px', padding: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>הוסף</button>
+        <button onClick={() => { setName(''); setPhone(''); setOpen(false); }}
+          style={{ flex: 1, background: 'transparent', color: '#94a3b8', border: '1px solid #3b3b5c', borderRadius: '6px', padding: '8px', fontSize: '13px', cursor: 'pointer' }}>ביטול</button>
+      </div>
+    </div>
+  );
+}
+
+function Stats({ leads }) {
+  const counts = leads.reduce((a, l) => { a[l.status] = (a[l.status] || 0) + 1; return a; }, {});
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px', marginBottom: '16px' }}>
+      {Object.entries(STATUS).map(([k, s]) => (
+        <div key={k} style={{ background: s.bg, border: `1px solid ${s.color}30`, borderRadius: '8px', padding: '8px 4px', textAlign: 'center' }}>
+          <div style={{ color: s.color, fontSize: '18px', fontWeight: '700' }}>{counts[k] || 0}</div>
+          <div style={{ color: s.color, fontSize: '9px', letterSpacing: '0.05em', opacity: 0.8 }}>{s.label}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function App() {
+  const [leads, setLeads] = useState([]);
+  const [tab, setTab] = useState('leads');
+  const [online, setOnline] = useState(navigator.onLine);
+  const [syncing, setSyncing] = useState(false);
+  const [lastSync, setLastSync] = useState(null);
+
+  useEffect(() => {
+    const on = () => setOnline(true);
+    const off = () => setOnline(false);
+    window.addEventListener('online', on);
+    window.addEventListener('offline', off);
+    return () => { window.removeEventListener('online', on); window.removeEventListener('offline', off); };
+  }, []);
+
+  useEffect(() => {
+    const local = loadLocal();
+    setLeads(local);
+    if (navigator.onLine) syncFromCloud(local);
+  }, []);
+
+  useEffect(() => {
+    if (online) syncFromCloud(leads);
+  }, [online]);
+
+  const syncFromCloud = async (currentLeads) => {
+    setSyncing(true);
+    const remote = await sbFetch();
+    if (remote) {
+      const remoteIds = new Set(remote.map(l => l.id));
+      const localOnly = (currentLeads || leads).filter(l => \!remoteIds.has(l.id));
+      const merged = [...remote, ...localOnly];
+      setLeads(merged);
+      saveLocal(merged);
+      setLastSync(new Date());
+    }
+    setSyncing(false);
+  };
+
+  const addLead = (lead) => {
+    const updated = [lead, ...leads];
+    setLeads(updated);
+    saveLocal(updated);
+    sbUpsert(lead);
+  };
+
+  const updateLead = (updated) => {
+    const list = leads.map(l => l.id === updated.id ? updated : l);
+    setLeads(list);
+    saveLocal(list);
+    sbUpsert(updated);
+  };
+
+  const deleteLead = (id) => {
+    const list = leads.filter(l => l.id \!== id);
+    setLeads(list);
+    saveLocal(list);
+    sbDelete(id);
+  };
+
+  const exportList = () => {
+    const text = leads.filter(l => l.phone).map(l => `${l.name} | ${l.phone}`).join('\n');
+    navigator.clipboard.writeText(`רשימת לידים — דירת חולון\n\n${text}`);
+    alert('הרשימה הועתקה\!');
+  };
+
+  const tabBtn = (id, label) => (
+    <button onClick={() => setTab(id)} style={{ flex: 1, background: tab === id ? '#4f46e5' : 'transparent',
+      color: tab === id ? 'white' : '#94a3b8', border: 'none', borderRadius: '7px', padding: '8px',
+      fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>{label}</button>
+  );
+
+  return (
+    <div style={{ background: 'linear-gradient(180deg, #0d0d1a 0%, #16162d 100%)', minHeight: '100vh',
+      padding: '20px 16px 40px', direction: 'rtl' }}>
+      <div style={{ maxWidth: '560px', margin: '0 auto' }}>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <div>
+            <h1 style={{ color: '#f1f5f9', fontSize: '22px', fontWeight: '700', margin: '0 0 4px 0' }}>🏠 ניהול לידים</h1>
+            <p style={{ color: '#64748b', fontSize: '12px', margin: 0, fontFamily: 'monospace' }}>דירת חולון · קוגל פינת סוקולוב</p>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+            <span style={{ fontSize: '10px', color: online ? '#4ade80' : '#f87171', fontFamily: 'monospace' }}>
+              {online ? '● אונליין' : '○ אופליין'}
+            </span>
+            <button onClick={() => syncFromCloud(leads)} disabled={\!online || syncing}
+              style={{ background: 'transparent', color: '#a78bfa', border: '1px solid #4f46e5',
+                borderRadius: '6px', padding: '3px 8px', fontSize: '10px', cursor: online ? 'pointer' : 'default',
+                opacity: online ? 1 : 0.4 }}>
+              {syncing ? '⟳ מסנכרן...' : '↻ סנכרן'}
+            </button>
+            {lastSync && <span style={{ fontSize: '9px', color: '#475569' }}>{lastSync.toLocaleTimeString('he-IL')}</span>}
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: '6px', marginBottom: '16px', background: '#1a1a2e',
+          padding: '4px', borderRadius: '10px', border: '1px solid #2d2d4a' }}>
+          {tabBtn('leads', `לידים (${leads.length})`)}
+          {tabBtn('templates', 'תשובות מוכנות')}
+        </div>
+
+        {tab === 'leads' && (
+          <>
+            <Stats leads={leads} />
+            <AddLeadForm onAdd={addLead} />
+            {leads.length === 0 ? (
+              <div style={{ color: '#64748b', textAlign: 'center', padding: '40px 20px', fontSize: '13px' }}>
+                אין לידים עדיין.
+              </div>
+            ) : (
+              leads.map(lead => (
+                <LeadCard key={lead.id} lead={lead} onUpdate={updateLead} onDelete={deleteLead} />
+              ))
+            )}
+            {leads.filter(l => l.phone).length > 0 && (
+              <button onClick={exportList}
+                style={{ width: '100%', background: 'transparent', color: '#a78bfa', border: '1px dashed #4f46e5',
+                  borderRadius: '10px', padding: '12px', fontSize: '13px', cursor: 'pointer', marginTop: '10px' }}>
+                📋 העתק רשימה לזהבית
+              </button>
+            )}
+          </>
+        )}
+
+        {tab === 'templates' && (
+          <div>
+            <p style={{ color: '#64748b', fontSize: '12px', marginBottom: '12px', fontFamily: 'monospace' }}>
+              לחץ "העתק" ליד כל הודעה והדבק בפייסבוק
+            </p>
+            {TEMPLATES.map((t, i) => (
+              <div key={i} style={{ background: '#16213e', border: '1px solid #0f3460', borderRadius: '10px', padding: '12px 14px', marginBottom: '8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', gap: '10px' }}>
+                  <span style={{ color: '#a78bfa', fontSize: '10px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{t.label}</span>
+                  <CopyButton text={t.text} small />
+                </div>
+                <p style={{ color: '#cbd5e1', margin: 0, fontSize: '13px', lineHeight: '1.6', whiteSpace: 'pre-line' }}>{t.text}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div style={{ marginTop: '24px', textAlign: 'center', color: '#475569', fontSize: '10px', fontFamily: 'monospace', letterSpacing: '0.1em' }}>
+          {online ? 'מסונכרן עם ענן ☁' : 'נשמר מקומית — יסונכרן כשיחזור אינטרנט'}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
