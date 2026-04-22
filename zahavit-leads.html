@@ -1,0 +1,228 @@
+<\!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="לידים - זהבית">
+<meta name="theme-color" content="#0d0d1a">
+<title>לידים — זהבית</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>* { box-sizing: border-box; } body { margin: 0; background: #0d0d1a; font-family: 'Segoe UI', -apple-system, sans-serif; } input, textarea, button { font-family: inherit; }</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+const SB_URL = 'https://qcsseuzpltcspwoovozx.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjc3NldXpwbHRjc3B3b292b3p4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3Njg4NzcsImV4cCI6MjA5MjM0NDg3N30.xEUKcNvrRFcgly70F7Lp_OeOla_0G4PLPC2vonpSke8';
+const SB_H = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' };
+
+const STATUS = {
+  new:     { label: 'חדש',          color: '#60a5fa', bg: '#1e3a5f' },
+  waiting: { label: 'ממתין',         color: '#fbbf24', bg: '#3d2d0a' },
+  sent:    { label: 'נשלח לי',      color: '#a78bfa', bg: '#2d1f4d' },
+  closed:  { label: 'טופל ✓',       color: '#4ade80', bg: '#0f2d1a' },
+  lost:    { label: 'לא רלוונטי',   color: '#f87171', bg: '#2d0f0f' },
+};
+
+async function sbFetch() {
+  try {
+    const r = await fetch(SB_URL + '/rest/v1/leads?select=*&order=created_at.desc', { headers: SB_H });
+    if (r.ok) return await r.json();
+  } catch(e) {}
+  return [];
+}
+
+async function sbUpdate(id, fields) {
+  try {
+    await fetch(SB_URL + '/rest/v1/leads?id=eq.' + id, {
+      method: 'PATCH',
+      headers: { ...SB_H, 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ ...fields, updated_at: new Date().toISOString() })
+    });
+  } catch(e) {}
+}
+
+function LeadCard({ lead, onUpdate }) {
+  const [expanded, setExpanded] = useState(false);
+  const [editNote, setEditNote] = useState(false);
+  const [noteDraft, setNoteDraft] = useState(lead.note || '');
+  const [saving, setSaving] = useState(false);
+  const s = STATUS[lead.status] || STATUS.new;
+
+  const cycleStatus = async () => {
+    const keys = Object.keys(STATUS);
+    const next = keys[(keys.indexOf(lead.status) + 1) % keys.length];
+    onUpdate(lead.id, { status: next });
+    await sbUpdate(lead.id, { status: next });
+  };
+
+  const saveNote = async () => {
+    setSaving(true);
+    onUpdate(lead.id, { note: noteDraft });
+    await sbUpdate(lead.id, { note: noteDraft });
+    setSaving(false);
+    setEditNote(false);
+  };
+
+  const isNew = lead.status === 'new' || lead.status === 'sent';
+
+  return (
+    <div style={{ background: '#1a1a2e', border: `1px solid ${isNew ? s.color + '60' : '#2d2d4a'}`,
+      borderRadius: '12px', padding: '14px 16px', marginBottom: '10px',
+      boxShadow: isNew ? `0 0 12px ${s.color}20` : 'none' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px' }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
+            {isNew && <span style={{ fontSize: '10px', color: '#fbbf24' }}>● חדש</span>}
+            <span style={{ color: '#f1f5f9', fontSize: '15px', fontWeight: '600' }}>{lead.name || 'ללא שם'}</span>
+          </div>
+          <div style={{ color: '#e2e8f0', fontSize: '18px', fontFamily: 'monospace', direction: 'ltr', textAlign: 'right', fontWeight: '600' }}>
+            {lead.phone || 'אין מספר'}
+          </div>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'flex-end' }}>
+          <button onClick={cycleStatus}
+            style={{ background: s.bg, color: s.color, border: `1px solid ${s.color}40`,
+              borderRadius: '999px', padding: '4px 10px', fontSize: '10px', cursor: 'pointer', fontWeight: '600' }}>
+            {s.label}
+          </button>
+          <button onClick={() => setExpanded(\!expanded)}
+            style={{ background: 'transparent', color: '#94a3b8', border: '1px solid #3b3b5c',
+              borderRadius: '6px', padding: '3px 8px', fontSize: '10px', cursor: 'pointer' }}>
+            {expanded ? '▲' : '▼'}
+          </button>
+        </div>
+      </div>
+
+      {lead.phone && (
+        <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+          <a href={`tel:${lead.phone}`}
+            style={{ flex: 1, display: 'block', background: 'linear-gradient(135deg, #166534, #15803d)',
+              color: 'white', borderRadius: '8px', padding: '10px', textAlign: 'center',
+              textDecoration: 'none', fontSize: '14px', fontWeight: '600' }}>
+            📞 התקשר
+          </a>
+          <a href={`https://wa.me/972${lead.phone.replace(/^0/, '').replace(/[-\s]/g, '')}`} target="_blank"
+            style={{ flex: 1, display: 'block', background: 'linear-gradient(135deg, #14532d, #166534)',
+              color: '#4ade80', borderRadius: '8px', padding: '10px', textAlign: 'center',
+              textDecoration: 'none', fontSize: '14px', fontWeight: '600' }}>
+            💬 וואצאפ
+          </a>
+        </div>
+      )}
+
+      {expanded && (
+        <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #2d2d4a' }}>
+          <div style={{ color: '#a78bfa', fontSize: '10px', letterSpacing: '0.1em', marginBottom: '6px', textTransform: 'uppercase' }}>הערות</div>
+          {editNote ? (
+            <div>
+              <textarea value={noteDraft} onChange={e => setNoteDraft(e.target.value)}
+                style={{ width: '100%', background: '#0d0d1a', color: '#e2e8f0', border: '1px solid #3b3b5c',
+                  borderRadius: '6px', padding: '8px', fontSize: '13px', minHeight: '70px', resize: 'vertical' }} />
+              <div style={{ display: 'flex', gap: '6px', marginTop: '6px' }}>
+                <button onClick={saveNote} disabled={saving}
+                  style={{ flex: 1, background: '#22c55e', color: 'white', border: 'none', borderRadius: '6px', padding: '6px', fontSize: '12px', cursor: 'pointer' }}>
+                  {saving ? 'שומר...' : 'שמור'}
+                </button>
+                <button onClick={() => { setNoteDraft(lead.note || ''); setEditNote(false); }}
+                  style={{ flex: 1, background: 'transparent', color: '#94a3b8', border: '1px solid #3b3b5c', borderRadius: '6px', padding: '6px', fontSize: '12px', cursor: 'pointer' }}>ביטול</button>
+              </div>
+            </div>
+          ) : (
+            <div onClick={() => setEditNote(true)}
+              style={{ color: lead.note ? '#e2e8f0' : '#64748b', fontSize: '13px', cursor: 'pointer',
+                fontStyle: lead.note ? 'normal' : 'italic', padding: '8px', background: '#0d0d1a',
+                borderRadius: '6px', minHeight: '36px', whiteSpace: 'pre-wrap' }}>
+              {lead.note || 'לחץ להוספת הערה...'}
+            </div>
+          )}
+          {lead.source && <div style={{ color: '#64748b', fontSize: '11px', marginTop: '8px' }}>📍 מקור: {lead.source}</div>}
+          <div style={{ color: '#475569', fontSize: '10px', marginTop: '4px', fontFamily: 'monospace' }}>
+            {new Date(lead.created_at).toLocaleDateString('he-IL')}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function App() {
+  const [leads, setLeads] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('all');
+  const [lastSync, setLastSync] = useState(null);
+
+  const load = async () => {
+    setLoading(true);
+    const data = await sbFetch();
+    setLeads(data);
+    setLastSync(new Date());
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const updateLead = (id, fields) => {
+    setLeads(prev => prev.map(l => l.id === id ? { ...l, ...fields } : l));
+  };
+
+  const filtered = filter === 'all' ? leads : leads.filter(l => l.status === filter);
+  const newCount = leads.filter(l => l.status === 'new' || l.status === 'sent').length;
+
+  return (
+    <div style={{ background: 'linear-gradient(180deg, #0d0d1a 0%, #16162d 100%)', minHeight: '100vh',
+      padding: '20px 16px 40px', direction: 'rtl' }}>
+      <div style={{ maxWidth: '480px', margin: '0 auto' }}>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <div>
+            <h1 style={{ color: '#f1f5f9', fontSize: '20px', fontWeight: '700', margin: '0 0 2px 0' }}>
+              🏠 לידים — זהבית
+              {newCount > 0 && <span style={{ marginRight: '8px', background: '#7c3aed', color: 'white', borderRadius: '999px', padding: '2px 8px', fontSize: '12px' }}>{newCount} חדש</span>}
+            </h1>
+            <p style={{ color: '#64748b', fontSize: '11px', margin: 0, fontFamily: 'monospace' }}>דירת חולון</p>
+          </div>
+          <button onClick={load} style={{ background: 'transparent', color: '#a78bfa', border: '1px solid #4f46e5',
+            borderRadius: '6px', padding: '5px 10px', fontSize: '11px', cursor: 'pointer' }}>
+            {loading ? '⟳' : '↻ רענן'}
+          </button>
+        </div>
+
+        <div style={{ display: 'flex', gap: '6px', marginBottom: '16px', overflowX: 'auto', paddingBottom: '4px' }}>
+          {[['all', 'הכל'], ['new', 'חדש'], ['sent', 'נשלח לי'], ['waiting', 'ממתין'], ['closed', 'טופל']].map(([k, l]) => (
+            <button key={k} onClick={() => setFilter(k)}
+              style={{ background: filter === k ? '#4f46e5' : '#1a1a2e', color: filter === k ? 'white' : '#94a3b8',
+                border: `1px solid ${filter === k ? '#4f46e5' : '#2d2d4a'}`, borderRadius: '999px',
+                padding: '5px 12px', fontSize: '12px', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}>
+              {l}
+            </button>
+          ))}
+        </div>
+
+        {loading ? (
+          <div style={{ textAlign: 'center', color: '#64748b', padding: '40px', fontSize: '13px' }}>טוען לידים...</div>
+        ) : filtered.length === 0 ? (
+          <div style={{ textAlign: 'center', color: '#64748b', padding: '40px', fontSize: '13px' }}>אין לידים בקטגוריה זו</div>
+        ) : (
+          filtered.map(lead => <LeadCard key={lead.id} lead={lead} onUpdate={updateLead} />)
+        )}
+
+        <div style={{ textAlign: 'center', color: '#475569', fontSize: '9px', fontFamily: 'monospace', marginTop: '20px' }}>
+          {lastSync ? `עדכון אחרון: ${lastSync.toLocaleTimeString('he-IL')}` : ''}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
